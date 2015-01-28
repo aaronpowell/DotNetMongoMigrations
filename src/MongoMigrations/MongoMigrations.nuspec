@@ -1,14 +1,20 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <id>MongoMigrations</id>
-    <version>$version$</version>
-    <authors>https://github.com/phoenixwebgroup/DotNetMongoMigrations</authors>
-    <owners></owners>
-    <licenseUrl>https://github.com/phoenixwebgroup/DotNetMongoMigrations</licenseUrl>
-    <projectUrl>https://github.com/phoenixwebgroup/DotNetMongoMigrations</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Mongo migrations for dot net developers</description>
-    <tags>Mongo Migrations</tags>
-  </metadata>
+    <metadata>
+        <id>MongoMigrations</id>
+        <version>$version$</version>
+        <authors>https://github.com/phoenixwebgroup/DotNetMongoMigrations</authors>
+        <owners></owners>
+        <licenseUrl>https://github.com/phoenixwebgroup/DotNetMongoMigrations</licenseUrl>
+        <projectUrl>https://github.com/phoenixwebgroup/DotNetMongoMigrations</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Mongo migrations for dot net developers</description>
+        <tags>Mongo Migrations</tags>
+        <dependencies>
+            <dependency id="MongoDB.Driver" version="2.0.0-beta1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\..\build\MongoMigrations.dll" target="lib\net45" />
+    </files>
 </package>
