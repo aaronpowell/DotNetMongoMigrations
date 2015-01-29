@@ -3,6 +3,7 @@
 	using System;
 	using System.Linq;
 	using MongoDB.Driver;
+	using System.Threading.Tasks;
 
 	public class DatabaseMigrationStatus
 	{
@@ -15,7 +16,7 @@
 			_Runner = runner;
 		}
 
-		public virtual MongoCollection<AppliedMigration> GetMigrationsApplied()
+		public virtual IMongoCollection<AppliedMigration> GetMigrationsApplied()
 		{
 			return _Runner.Database.GetCollection<AppliedMigration>(VersionCollectionName);
 		}
@@ -23,7 +24,7 @@
 		public virtual bool IsNotLatestVersion()
 		{
 			return _Runner.MigrationLocator.LatestVersion()
-			       != GetVersion();
+				   != GetVersion();
 		}
 
 		public virtual void ThrowIfNotLatestVersion()
@@ -41,30 +42,37 @@
 		{
 			var lastAppliedMigration = GetLastAppliedMigration();
 			return lastAppliedMigration == null
-			       	? MigrationVersion.Default()
-			       	: lastAppliedMigration.Version;
+					? MigrationVersion.Default()
+					: lastAppliedMigration.Version;
 		}
 
 		public virtual AppliedMigration GetLastAppliedMigration()
 		{
-			return GetMigrationsApplied()
-				.FindAll()
-				.ToList() // in memory but this will never get big enough to matter
-				.OrderByDescending(v => v.Version)
-				.FirstOrDefault();
+			var items = GetMigrationsApplied()
+				.Aggregate()
+				.ToListAsync()
+				.Result; // in memory but this will never get big enough to matter
+			return items 
+					.OrderByDescending(v => v.Version)
+					.FirstOrDefault();
 		}
 
 		public virtual AppliedMigration StartMigration(Migration migration)
 		{
 			var appliedMigration = new AppliedMigration(migration);
-			GetMigrationsApplied().Insert(appliedMigration);
+			Task.WaitAll(GetMigrationsApplied().InsertOneAsync(appliedMigration));
 			return appliedMigration;
 		}
 
 		public virtual void CompleteMigration(AppliedMigration appliedMigration)
 		{
 			appliedMigration.CompletedOn = DateTime.Now;
-			GetMigrationsApplied().Save(appliedMigration);
+			Task.WaitAll(
+				GetMigrationsApplied().UpdateOneAsync(
+					m => m.Version == appliedMigration.Version,
+					builder => builder.Set(x => x.CompletedOn, DateTime.Now)
+				)
+			);
 		}
 
 		public virtual void MarkUpToVersion(MigrationVersion version)
@@ -78,7 +86,7 @@
 		public virtual void MarkVersion(MigrationVersion version)
 		{
 			var appliedMigration = AppliedMigration.MarkerOnly(version);
-			GetMigrationsApplied().Insert(appliedMigration);
+			Task.WaitAll(GetMigrationsApplied().InsertOneAsync(appliedMigration));
 		}
 	}
 }
