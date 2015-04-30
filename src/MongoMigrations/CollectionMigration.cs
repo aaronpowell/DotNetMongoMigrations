@@ -14,7 +14,7 @@ namespace MongoMigrations
 			CollectionName = collectionName;
 		}
 
-		public virtual IMongoQuery Filter()
+		public virtual FilterDefinition<BsonDocument> Filter()
 		{
 			return null;
 		}

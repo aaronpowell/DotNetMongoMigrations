@@ -52,7 +52,7 @@
 				.Aggregate()
 				.ToListAsync()
 				.Result; // in memory but this will never get big enough to matter
-			return items 
+			return items
 					.OrderByDescending(v => v.Version)
 					.FirstOrDefault();
 		}
@@ -70,7 +70,7 @@
 			Task.WaitAll(
 				GetMigrationsApplied().UpdateOneAsync(
 					m => m.Version == appliedMigration.Version,
-					builder => builder.Set(x => x.CompletedOn, DateTime.Now)
+					Builders<AppliedMigration>.Update.Set(x => x.CompletedOn, DateTime.Now)
 				)
 			);
 		}
